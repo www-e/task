@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Define the shape of the data based on your Mongoose Models
 export interface Announcement {
   _id: string;
   author: string;
@@ -25,17 +24,19 @@ interface DashboardData {
   quizzes: Quiz[];
 }
 
+// 1. Get the URL from Environment Variable (fallback to localhost for safety)
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5000/api' }), // Points to Express Server
+  baseQuery: fetchBaseQuery({ baseUrl }), 
   tagTypes: ['Dashboard'],
   endpoints: (builder) => ({
     getDashboardData: builder.query<DashboardData, void>({
-      query: () => '/dashboard',
+      query: () => '/dashboard', // Appended to baseUrl -> http://localhost:5000/api/dashboard
       providesTags: ['Dashboard'],
     }),
   }),
 });
 
-// Export hooks for usage in functional components
 export const { useGetDashboardDataQuery } = apiSlice;
