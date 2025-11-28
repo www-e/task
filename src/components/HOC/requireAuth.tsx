@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, ComponentType } from 'react';
+import React, { useEffect, ComponentType } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/lib/store';
