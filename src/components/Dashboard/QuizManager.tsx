@@ -94,11 +94,13 @@ export default function QuizManager({ data, isLoading }: { data: Quiz[]; isLoadi
   };
 
   const handleInputChange = (field: keyof QuizFormData) => (
-    event: any
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ value: unknown, checked?: boolean }>
   ) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'isCompleted' ? event.target.checked : event.target.value
+      [field]: field === 'isCompleted'
+        ? (event.target as HTMLInputElement).checked
+        : event.target.value
     }));
   };
 
@@ -165,7 +167,7 @@ export default function QuizManager({ data, isLoading }: { data: Quiz[]; isLoadi
     <>
       <Paper sx={{ p: 3, borderRadius: 4, height: '100%', bgcolor: '#fff' }} elevation={0}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h6" fontWeight="bold">What's due</Typography>
+          <Typography variant="h6" fontWeight="bold">What&apos;s due</Typography>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -296,7 +298,7 @@ export default function QuizManager({ data, isLoading }: { data: Quiz[]; isLoadi
               <InputLabel>Type</InputLabel>
               <Select
                 value={formData.type}
-                onChange={handleInputChange('type')}
+                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'quiz' | 'assignment' }))}
                 label="Type"
               >
                 <MenuItem value="quiz">Quiz</MenuItem>

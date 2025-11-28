@@ -19,7 +19,9 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.FRONTEND_URL || ''  // Use production frontend URL from env
+    : 'http://localhost:3000',       // Use localhost during development
   credentials: true
 }));
 app.use(cookieParser());
@@ -33,15 +35,13 @@ app.use((req, res, next) => {
 });
 
 // DB Connection
-const mongoURI = process.env.MONGO_URI;
-if (!mongoURI) {
-  console.error("❌ ERROR: MONGO_URI environment variable is required but not set.");
-  process.exit(1);
-} else {
-  mongoose.connect(mongoURI)
-    .then(() => console.log('✅ MongoDB Connected'))
-    .catch(err => console.error('❌ DB Error:', err));
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/coligo';
+if (!process.env.MONGO_URI) {
+  console.warn("⚠️ Warning: MONGO_URI not set in environment. Using local MongoDB: mongodb://localhost:27017/coligo");
 }
+mongoose.connect(mongoURI)
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.error('❌ DB Error:', err));
 
 // --- ROUTES ---
 
@@ -66,7 +66,18 @@ app.get('/api/dashboard', authenticateToken, async (req, res) => {
 });
 
 // 3. Mount route modules
+// Public auth routes (login, logout)
 app.use('/api/auth', authRoutes);
+
+// Protected auth routes (verify)
+app.get('/api/auth/verify', authenticateToken, (req, res) => {
+  console.log('✅ Token Verified');
+  res.json({
+    user: { id: req.user!.userId, name: req.user!.name, role: req.user!.role },
+    isAuthenticated: true
+  });
+});
+
 app.use('/api/announcements', authenticateToken, announcementRoutes);
 app.use('/api/quizzes', authenticateToken, quizRoutes);
 

@@ -24,8 +24,8 @@ interface DashboardData {
   quizzes: Quiz[];
 }
 
-// 1. Get the URL from Environment Variable (fallback to localhost for safety)
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// 1. Use Next.js API routes as proxy to backend
+const baseUrl = '/api';
 
 export const apiSlice = createApi({
   reducerPath: 'api',

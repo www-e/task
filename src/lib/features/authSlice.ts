@@ -30,12 +30,16 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
+        body: JSON.stringify({
+          email: process.env.NEXT_PUBLIC_DEFAULT_EMAIL || 'demo@example.com',
+          password: process.env.NEXT_PUBLIC_DEFAULT_PASSWORD || 'demo'
+        }),
       });
 
       if (!response.ok) {
@@ -55,7 +59,7 @@ export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/logout', {
+      const response = await fetch('/api/auth/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

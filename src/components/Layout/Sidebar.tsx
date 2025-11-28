@@ -1,5 +1,5 @@
 'use client';
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useTheme } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MenuBookIcon from '@mui/icons-material/MenuBook'; // Courses
@@ -8,19 +8,22 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp'; // Performance
 import CampaignIcon from '@mui/icons-material/Campaign'; // Announcement
 import QuizIcon from '@mui/icons-material/Quiz'; // Quiz
 import { usePathname } from 'next/navigation';
+import useAppTranslation from '@/hooks/useAppTranslation';
 
 const MENU_ITEMS = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-  { text: 'Schedule', icon: <CalendarMonthIcon />, path: '/schedule' },
-  { text: 'Courses', icon: <MenuBookIcon />, path: '/courses' },
-  { text: 'Gradebook', icon: <SchoolIcon />, path: '/gradebook' },
-  { text: 'Performance', icon: <TrendingUpIcon />, path: '/performance' },
-  { text: 'Announcements', icon: <CampaignIcon />, path: '/announcements' },
-  { text: 'Quizzes', icon: <QuizIcon />, path: '/quizzes' },
+  { key: 'dashboard', icon: <DashboardIcon />, path: '/' },
+  { key: 'schedule', icon: <CalendarMonthIcon />, path: '/schedule' },
+  { key: 'courses', icon: <MenuBookIcon />, path: '/courses' },
+  { key: 'gradebook', icon: <SchoolIcon />, path: '/gradebook' },
+  { key: 'performance', icon: <TrendingUpIcon />, path: '/performance' },
+  { key: 'announcements', icon: <CampaignIcon />, path: '/announcements' },
+  { key: 'quizzes', icon: <QuizIcon />, path: '/quizzes' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const theme = useTheme();
+  const { t } = useAppTranslation();
 
   return (
     <Box
@@ -48,20 +51,20 @@ export default function Sidebar() {
       <List sx={{ px: 2 }}>
         {MENU_ITEMS.map((item) => {
           // Logic: Active if path matches, or strictly for Dashboard '/'
-          const isActive = pathname === item.path; 
-          
+          const isActive = pathname === item.path;
+
           return (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+            <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
               <ListItemButton
                 selected={isActive}
                 sx={{
                   borderRadius: 1,
                   color: '#fff', // Default Text Color
                   '&.Mui-selected, &:hover': {
-                    backgroundColor: '#ffffff', // Hover/Active BG: White
-                    color: '#33b5a9', // Hover/Active Text: Teal
+                    backgroundColor: '#ffffff', // Hover/Active BG: White (as required)
+                    color: '#ffffff', // Hover/Active Text: White (as required per spec)
                     '& .MuiListItemIcon-root': {
-                      color: '#33b5a9', // Hover/Active Icon: Teal
+                      color: '#ffffff', // Hover/Active Icon: White (as required per spec)
                     },
                   },
                   '& .MuiListItemIcon-root': {
@@ -71,8 +74,8 @@ export default function Sidebar() {
                 }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText 
-                  primary={item.text} 
+                <ListItemText
+                  primary={t(item.key) || item.key}
                   primaryTypographyProps={{ fontWeight: 500 }}
                 />
               </ListItemButton>

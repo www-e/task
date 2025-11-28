@@ -9,12 +9,15 @@ const router = Router();
 router.post('/login', (req: Request, res: Response) => {
   console.log('🔑 Login Attempt');
 
+  // Extract potential credentials from request body (if provided)
+  const { email: reqEmail } = req.body;
+
   try {
     // For demo purposes, using hardcoded user but with environment variables
     const userId = process.env.DEFAULT_USER_ID || "u_1";
     const userName = process.env.DEFAULT_USER_NAME || "Talia";
     const userRole = process.env.DEFAULT_USER_ROLE || "Student";
-    const userEmail = process.env.DEFAULT_USER_EMAIL || "talia@example.com";
+    const userEmail = reqEmail || process.env.DEFAULT_USER_EMAIL || "talia@example.com";
 
     // Generate JWT Token
     const token = jwt.sign(
@@ -50,7 +53,7 @@ router.post('/login', (req: Request, res: Response) => {
 // Logout
 router.post('/logout', (req: Request, res: Response) => {
   console.log('🚪 Logout Attempt');
-  
+
   // Clear the cookie
   res.clearCookie(JWT_CONFIG.cookieName, {
     httpOnly: true,
@@ -59,15 +62,6 @@ router.post('/logout', (req: Request, res: Response) => {
   });
 
   res.json({ message: 'Logged out successfully' });
-});
-
-// Verify Auth Status
-router.get('/verify', (req: Request, res: Response) => {
-  console.log('✅ Token Verified');
-  res.json({
-    user: { id: req.user!.userId, name: req.user!.name, role: req.user!.role },
-    isAuthenticated: true
-  });
 });
 
 export default router;

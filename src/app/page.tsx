@@ -7,9 +7,11 @@ import AnnouncementManager from '@/components/Dashboard/AnnouncementManager';
 import QuizManager from '@/components/Dashboard/QuizManager';
 import requireAuth from '@/components/HOC/requireAuth';
 import { useGetDashboardDataQuery } from '@/lib/features/apiSlice';
+import useAppTranslation from '@/hooks/useAppTranslation';
 
 function Dashboard() {
   const { data, isLoading, error } = useGetDashboardDataQuery();
+  const { t } = useAppTranslation();
 
   // 1. Loading State
   if (isLoading) {
@@ -27,7 +29,7 @@ function Dashboard() {
     return (
       <DashboardLayout>
         <Typography color="error" variant="h6" align="center" sx={{ mt: 10 }}>
-          Failed to load dashboard data. Is the backend running?
+          {t('failedToLoadDashboard') || 'Failed to load dashboard data. Is the backend running?'}
         </Typography>
       </DashboardLayout>
     );
