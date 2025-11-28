@@ -3,8 +3,8 @@
 import { Box, Grid, CircularProgress, Typography } from '@mui/material'; // Standard Import
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import HeroSection from '@/components/Dashboard/HeroSection';
-import Announcements from '@/components/Dashboard/Announcements';
-import Quizzes from '@/components/Dashboard/Quizzes';
+import AnnouncementManager from '@/components/Dashboard/AnnouncementManager';
+import QuizManager from '@/components/Dashboard/QuizManager';
 import requireAuth from '@/components/HOC/requireAuth';
 import { useGetDashboardDataQuery } from '@/lib/features/apiSlice';
 
@@ -41,15 +41,15 @@ function Dashboard() {
       {/* Container still needs 'container' and 'spacing' */}
       <Grid container spacing={4}>
         
-        {/* Left Column: Announcements */}
+        {/* Left Column: Announcements with CRUD */}
         {/* API Change: No 'item'. Use 'size' object for breakpoints */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Announcements data={data?.announcements || []} />
+          <AnnouncementManager data={data?.announcements || []} isLoading={isLoading} />
         </Grid>
 
-        {/* Right Column: Quizzes/Due */}
+        {/* Right Column: Quizzes/Due with CRUD */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Quizzes data={data?.quizzes || []} />
+          <QuizManager data={data?.quizzes || []} isLoading={isLoading} />
         </Grid>
         
       </Grid>

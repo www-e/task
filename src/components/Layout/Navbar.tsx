@@ -1,13 +1,35 @@
 'use client';
-import { AppBar, Toolbar, Typography, Box, InputBase, IconButton, Avatar, Badge } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, InputBase, IconButton, Avatar, Badge, Menu, MenuItem } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import EmailIcon from '@mui/icons-material/Email';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/lib/store';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@/lib/store';
+import { logoutUser } from '@/lib/features/authSlice';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isMenuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    handleMenuClose();
+    router.push('/login');
+  };
 
   return (
     <AppBar 
@@ -59,13 +81,33 @@ export default function Navbar() {
             </IconButton>
           </Box>
 
-          {/* Avatar */}
+          {/* Avatar with Logout Menu */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar 
-              src={user?.avatar} 
-              alt={user?.name} 
-              sx={{ width: 40, height: 40 }}
-            />
+            <IconButton onClick={handleMenuClick}>
+              <Avatar 
+                src={user?.avatar || "https://i.pravatar.cc/150?u=talia"} 
+                alt={user?.name} 
+                sx={{ width: 40, height: 40 }}
+              />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={isMenuOpen}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={handleLogout}>
+                <LogoutIcon sx={{ mr: 1 }} />
+                Logout
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
       </Toolbar>

@@ -1,37 +1,150 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 interface User {
+  id: string;
   name: string;
   avatar?: string;
+  role: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface RootState {
+  auth: AuthState;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  isLoading: false,
+  error: null,
 };
+
+// Async thunk for login
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
+    }
+  }
+);
+
+// Async thunk for logout
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
+      return true;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Logout failed');
+    }
+  }
+);
+
+// Async thunk for verifying authentication
+export const verifyAuth = createAsyncThunk(
+  'auth/verify',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Authentication verification failed');
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Verification failed');
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    login: (state) => {
-      state.user = {
-        name: 'Talia',
-        avatar: 'https://i.pravatar.cc/150?u=talia',
-      };
-      state.isAuthenticated = true;
+    clearError: (state) => {
+      state.error = null;
     },
-    logout: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-    },
+  },
+  extraReducers: (builder) => {
+    // Login
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = action.payload as string;
+      })
+      // Logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      // Verify auth
+      .addCase(verifyAuth.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(verifyAuth.rejected, (state) => {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = null;
+      });
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

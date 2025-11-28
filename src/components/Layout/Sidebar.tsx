@@ -6,6 +6,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'; // Courses
 import SchoolIcon from '@mui/icons-material/School'; // Gradebook
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'; // Performance
 import CampaignIcon from '@mui/icons-material/Campaign'; // Announcement
+import QuizIcon from '@mui/icons-material/Quiz'; // Quiz
 import { usePathname } from 'next/navigation';
 
 const MENU_ITEMS = [
@@ -14,7 +15,8 @@ const MENU_ITEMS = [
   { text: 'Courses', icon: <MenuBookIcon />, path: '/courses' },
   { text: 'Gradebook', icon: <SchoolIcon />, path: '/gradebook' },
   { text: 'Performance', icon: <TrendingUpIcon />, path: '/performance' },
-  { text: 'Announcement', icon: <CampaignIcon />, path: '/announcement' },
+  { text: 'Announcements', icon: <CampaignIcon />, path: '/announcements' },
+  { text: 'Quizzes', icon: <QuizIcon />, path: '/quizzes' },
 ];
 
 export default function Sidebar() {
@@ -25,13 +27,14 @@ export default function Sidebar() {
       sx={{
         width: 250,
         height: '100vh',
-        background: 'linear-gradient(180deg, #153c5e 0%, #1e4d76 100%)', // Navy Gradient
+        background: 'linear-gradient(180deg, #0a2842 0%, #153c5e 25%, #1e4d76 50%, #2a5f8a 75%, #153c5e 100%)', // Enhanced Multi-stop Navy Gradient
         color: '#fff',
         position: 'fixed',
         left: 0,
         top: 0,
         display: { xs: 'none', md: 'block' }, // Hide on mobile (simplified)
         zIndex: 1200,
+        boxShadow: '4px 0 10px rgba(0,0,0,0.15)',
       }}
     >
       {/* Brand Logo */}

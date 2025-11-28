@@ -3,6 +3,13 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+
+// Import route modules
+import authRoutes from './routes/auth';
+import announcementRoutes from './routes/announcements';
+import quizRoutes from './routes/quizzes';
+import { authenticateToken } from './middleware/auth';
 import { Announcement, Quiz } from './models';
 
 dotenv.config();
@@ -11,9 +18,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000'],
+  credentials: true
+}));
+app.use(cookieParser());
 app.use(express.json());
-app.use(morgan('dev')); // Standard logging
+app.use(morgan('dev'));
 
 // 🔍 DEBUG: Log every incoming request URL manually
 app.use((req, res, next) => {
@@ -22,9 +33,10 @@ app.use((req, res, next) => {
 });
 
 // DB Connection
-const mongoURI = process.env.MONGO_URI || '';
+const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
-  console.error("❌ MONGO_URI missing");
+  console.error("❌ ERROR: MONGO_URI environment variable is required but not set.");
+  process.exit(1);
 } else {
   mongoose.connect(mongoURI)
     .then(() => console.log('✅ MongoDB Connected'))
@@ -38,8 +50,8 @@ app.get('/', (req, res) => {
   res.send('API Root is working');
 });
 
-// 2. Dashboard Data
-app.get('/api/dashboard', async (req, res) => {
+// 2. Dashboard Data (Protected Route)
+app.get('/api/dashboard', authenticateToken, async (req, res) => {
   console.log('📂 Accessing Dashboard Data...');
   try {
     const announcements = await Announcement.find().sort({ createdAt: -1 });
@@ -53,14 +65,10 @@ app.get('/api/dashboard', async (req, res) => {
   }
 });
 
-// 3. Login
-app.post('/api/login', (req, res) => {
-  console.log('🔑 Login Attempt');
-  res.json({
-    user: { id: "u_1", name: "Talia", role: "Student", avatar: "https://i.pravatar.cc/150?u=talia" },
-    token: "mock-token"
-  });
-});
+// 3. Mount route modules
+app.use('/api/auth', authRoutes);
+app.use('/api/announcements', authenticateToken, announcementRoutes);
+app.use('/api/quizzes', authenticateToken, quizRoutes);
 
 // Start Server
 app.listen(PORT, () => {
