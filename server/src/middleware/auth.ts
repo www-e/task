@@ -5,7 +5,15 @@ import { JWT_CONFIG } from '../config/auth';
 
 // JWT Authentication Middleware
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies?.token;
+  // Try to get token from cookie first
+  let token = req.cookies?.token;
+
+  // If no cookie, try to get from Authorization header
+  if (!token) {
+    const authHeader = req.headers['authorization'];
+    const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    token = bearerToken;
+  }
 
   if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });

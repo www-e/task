@@ -14,25 +14,33 @@ export default function requireAuth<P extends object>(WrappedComponent: Componen
     const router = useRouter();
 
     useEffect(() => {
+      let isMounted = true; // Prevent state updates on unmounted components
+
       // Verify authentication on mount
       const checkAuth = async () => {
         try {
-          await dispatch(verifyAuth());
+          const result = await dispatch(verifyAuth());
+          // Only redirect if component is still mounted and auth failed
+          if (isMounted && !result.payload) {
+            router.push('/login');
+          }
         } catch (error) {
           console.error('Auth verification failed:', error);
-          router.push('/login');
+          if (isMounted) {
+            router.push('/login');
+          }
         }
       };
 
-      checkAuth();
-    }, [dispatch, router]);
-
-    useEffect(() => {
-      // Redirect if not authenticated and not loading
-      if (!isLoading && !isAuthenticated) {
-        router.push('/login');
+      if (!isAuthenticated) {
+        checkAuth();
       }
-    }, [isAuthenticated, isLoading, router]);
+
+      // Cleanup function
+      return () => {
+        isMounted = false;
+      };
+    }, [dispatch, router, isAuthenticated]);
 
     // Show loading while checking authentication
     if (!isAuthenticated || isLoading) {

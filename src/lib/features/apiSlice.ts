@@ -29,10 +29,10 @@ const baseUrl = '/api';
 
 export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ 
+  baseQuery: fetchBaseQuery({
     baseUrl,
     credentials: 'include',
-  }), 
+  }),
   tagTypes: ['Dashboard', 'Announcement', 'Quiz'],
   endpoints: (builder) => ({
     getDashboardData: builder.query<DashboardData, void>({

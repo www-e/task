@@ -34,12 +34,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// DB Connection
+// DB Connection with optimized settings
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/coligo';
 if (!process.env.MONGO_URI) {
   console.warn("⚠️ Warning: MONGO_URI not set in environment. Using local MongoDB: mongodb://localhost:27017/coligo");
 }
-mongoose.connect(mongoURI)
+
+// Optimize MongoDB connection with connection pooling
+const dbOptions = {
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  bufferCommands: false, // Disable mongoose buffering
+};
+
+mongoose.connect(mongoURI, dbOptions)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ DB Error:', err));
 
@@ -54,9 +63,12 @@ app.get('/', (req, res) => {
 app.get('/api/dashboard', authenticateToken, async (req, res) => {
   console.log('📂 Accessing Dashboard Data...');
   try {
+    // Add cache headers to improve performance
+    res.setHeader('Cache-Control', 'private, no-cache, max-age=0'); // Don't cache on shared proxies but allow browser caching
+
     const announcements = await Announcement.find().sort({ createdAt: -1 });
     const quizzes = await Quiz.find().sort({ dueDate: 1 });
-    
+
     console.log(`✅ Returning ${announcements.length} announcements, ${quizzes.length} quizzes`);
     res.json({ announcements, quizzes });
   } catch (error) {

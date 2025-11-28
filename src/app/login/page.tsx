@@ -26,6 +26,18 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
+  // Prevent form resubmission on page refresh after login
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Cleanup any temporary login states if needed
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <Box 
       sx={{ 

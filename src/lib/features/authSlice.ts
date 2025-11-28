@@ -78,27 +78,6 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-// Async thunk for verifying authentication
-export const verifyAuth = createAsyncThunk(
-  'auth/verify',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await fetch('/api/auth/verify', {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Authentication verification failed');
-      }
-
-      const data = await response.json();
-      return data.user;
-    } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Verification failed');
-    }
-  }
-);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -135,17 +114,6 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
-      })
-      // Verify auth
-      .addCase(verifyAuth.fulfilled, (state, action) => {
-        state.isAuthenticated = true;
-        state.user = action.payload;
-        state.error = null;
-      })
-      .addCase(verifyAuth.rejected, (state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-        state.error = null;
       });
   },
 });

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const body = await request.json();
-    
+
     const response = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -30,12 +31,7 @@ export async function POST(request: NextRequest) {
       const data = await response.json();
 
       // Forward the response from the backend
-      return NextResponse.json(data, {
-        status: response.status,
-        headers: {
-          'Set-Cookie': response.headers.get('Set-Cookie') || '',
-        }
-      });
+      return NextResponse.json(data, { status: response.status });
     } else {
       // If it's not JSON, return an error
       const text = await response.text();

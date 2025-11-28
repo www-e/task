@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+    // Get the token from cookies and include it in the request
+    const cookieStore = cookies();
+    const token = cookieStore.get('token'); // Match the cookie name from JWT_CONFIG
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Include the token in headers if available
+    if (token) {
+      headers['Cookie'] = `${token.name}=${token.value}`;
+    }
+
     const response = await fetch(`${backendUrl}/api/quizzes`, {
       method: 'GET',
+      headers,
       credentials: 'include',
     });
 

@@ -13,6 +13,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    serverComponentsExternalPackages: ['mongoose'], // Optimize server component bundling
+  },
+  // Configure webpack optimization
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Client-side optimizations
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false, // Disable fs module on client
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

@@ -34,6 +34,12 @@ router.post('/login', (req: Request, res: Response) => {
       maxAge: JWT_CONFIG.cookieMaxAge
     });
 
+    // Add security and performance headers
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-store, must-revalidate'); // Prevent caching of login response
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.json({
       user: {
         id: userId,

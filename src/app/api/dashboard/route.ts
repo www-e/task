@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    
+
+    // Get the token from cookies and include it in the request
+    const cookieStore = cookies();
+    const token = cookieStore.get('token'); // Match the cookie name from JWT_CONFIG
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Include the token in headers if available
+    if (token) {
+      headers['Cookie'] = `${token.name}=${token.value}`;
+    }
+
     const response = await fetch(`${backendUrl}/api/dashboard`, {
       method: 'GET',
+      headers,
       credentials: 'include',
+      // Add cache option to prevent Next.js from recompiling unnecessarily
+      cache: 'no-store', // Initially no cache to fix the issue, can be optimized later
     });
 
     // Check if the response is ok and handle non-JSON responses
@@ -24,8 +41,13 @@ export async function GET(request: NextRequest) {
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
 
-      // Forward the response from the backend
-      return NextResponse.json(data, { status: response.status });
+      // Forward the response from the backend with caching headers
+      const nextResponse = NextResponse.json(data, { status: response.status });
+
+      // Add caching headers to improve performance for subsequent requests
+      nextResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
+      return nextResponse;
     } else {
       // If it's not JSON, return an error
       const text = await response.text();

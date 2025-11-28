@@ -10,7 +10,12 @@ import { useGetDashboardDataQuery } from '@/lib/features/apiSlice';
 import useAppTranslation from '@/hooks/useAppTranslation';
 
 function Dashboard() {
-  const { data, isLoading, error } = useGetDashboardDataQuery();
+  const { data, isLoading, error } = useGetDashboardDataQuery({
+    // Add refetch options to improve performance
+    refetchOnMountOrArgChange: false,  // Don't refetch on every mount
+    refetchOnReconnect: false,         // Don't refetch on reconnection
+    refetchOnFocus: false,             // Don't refetch when window gains focus
+  });
   const { t } = useAppTranslation();
 
   // 1. Loading State
@@ -42,7 +47,7 @@ function Dashboard() {
 
       {/* Container still needs 'container' and 'spacing' */}
       <Grid container spacing={4}>
-        
+
         {/* Left Column: Announcements with CRUD */}
         {/* API Change: No 'item'. Use 'size' object for breakpoints */}
         <Grid size={{ xs: 12, md: 8 }}>
@@ -53,7 +58,7 @@ function Dashboard() {
         <Grid size={{ xs: 12, md: 4 }}>
           <QuizManager data={data?.quizzes || []} isLoading={isLoading} />
         </Grid>
-        
+
       </Grid>
     </DashboardLayout>
   );
